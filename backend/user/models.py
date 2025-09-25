@@ -11,6 +11,7 @@ class User(AbstractUser):
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    username = models.CharField(max_length=150, blank=False, unique=False)
 
     USERNAME_FIELD = "email"  # Đăng nhập bằng email
     REQUIRED_FIELDS = ["username"]  # bắt buộc phải có username khi tạo user
