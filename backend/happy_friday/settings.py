@@ -53,6 +53,14 @@ REST_FRAMEWORK = {
     ),
 }
 CORS_ALLOW_ALL_ORIGINS = True
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # Access token sống 30 phút
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),      # Refresh token sống 7 ngày
+    "ROTATE_REFRESH_TOKENS": False,                   # Có muốn cấp mới refresh token mỗi lần dùng không
+    "BLACKLIST_AFTER_ROTATION": True,                 # Có blacklist refresh token cũ khi rotate không
+}
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
