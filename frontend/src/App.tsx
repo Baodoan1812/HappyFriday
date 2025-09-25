@@ -1,12 +1,19 @@
-import './App.css'
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 function App() {
-
   return (
-    <div className="h-screen flex items-center justify-center bg-blue-500 text-white text-3xl">
-      Hello Tailwind 🚀
-    </div>
-  )
+    <BrowserRouter>
+
+      {/* Routes */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />  
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
