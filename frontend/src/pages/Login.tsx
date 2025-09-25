@@ -1,15 +1,22 @@
 // src/pages/Login.tsx
 import { useState } from "react";
 import { signin } from "../services/auth/auth";
-
+import useGetDataUser from "../hooks/useGetUserData";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 export default function Login() {
+  const Navigate= useNavigate();
+  const { user } = useGetDataUser();
+  useEffect(() => {
+    if (user) {
+      Navigate("/");
+    }
+  }, [user, Navigate]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit =async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Email:", email);
-    console.log("Password:", password);
     const res = await signin(email, password);
     localStorage.setItem("token", res.access);
     window.location.href = "/";

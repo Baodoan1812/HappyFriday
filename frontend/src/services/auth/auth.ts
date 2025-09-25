@@ -16,3 +16,15 @@ export const signup = async (email: string, username: string, password: string) 
     throw error;
   }
 }
+export const getUserData= async () => {
+  try {
+    const res= await api.get("/me/", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+}
