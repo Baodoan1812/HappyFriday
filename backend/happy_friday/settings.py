@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'api',
     'user',
+    'task',
 ]
 
 AUTH_USER_MODEL = "user.User"
