@@ -2,20 +2,27 @@
 import { useEffect, useState } from "react";
 import { getTasks } from "../services/task/task";
 import TaskForm from "../components/TaskForm";
+import { Calendar, momentLocalizer, Views } from "react-big-calendar";
+import moment from "moment";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+
 type Task = {
   id: number;
   title: string;
   des?: string;
+  start?: string;
   deadline?: string;
   status: string;
 };
+
+const localizer = momentLocalizer(moment);
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Lấy danh sách task
   const fetchTasks = async () => {
     try {
       const res = await getTasks();
@@ -32,6 +39,61 @@ export default function Home() {
     fetchTasks();
   }, []);
 
+  // Helper: parse ISO string but TREAT IT AS LOCAL (bỏ 'Z' / timezone)
+  const parseAsLocal = (iso?: string) => {
+    if (!iso) return null;
+    // remove timezone marker 'Z' and fractional seconds if any
+    const s = iso.replace(/Z$/, "").split(".")[0];
+    const parts = s.split("T");
+    if (parts.length !== 2) {
+      // fallback: try normal Date parse
+      return new Date(iso);
+    }
+    const [date, time] = parts;
+    const [y, m, d] = date.split("-").map((v) => parseInt(v, 10));
+    const [hh = "0", mm = "0", ss = "0"] = time.split(":");
+    return new Date(
+      y,
+      (m || 1) - 1,
+      d || 1,
+      parseInt(hh as string, 10) || 0,
+      parseInt(mm as string, 10) || 0,
+      parseInt((ss as string).split(":")[0], 10) || 0
+    );
+  };
+
+  // Chuyển task -> event cho calendar, coi start/deadline như "local time"
+  const events = tasks
+    .filter((task) => task.deadline)
+    .map((task) => {
+      const startDate = task.start ? parseAsLocal(task.start) : null;
+      let endDate = task.deadline ? parseAsLocal(task.deadline) : null;
+
+      // nếu không có start mà chỉ có deadline, ta có thể để start = deadline - 1h
+      if (!startDate && endDate) {
+        const tmp = new Date(endDate.getTime() - 60 * 60 * 1000);
+        return {
+          id: task.id,
+          title: `${task.title} (${task.status})`,
+          start: tmp,
+          end: endDate,
+        };
+      }
+
+      // nếu start có nhưng end null -> end = start +1h
+      if (startDate && !endDate) {
+        endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+      }
+
+      return {
+        id: task.id,
+        title: `${task.title} (${task.status})`,
+        start: startDate || new Date(),
+        end: endDate || new Date(),
+      };
+    });
+
+  console.log("Events for calendar:", events);
 
   return (
     <div className="home-container p-4">
@@ -54,28 +116,21 @@ export default function Home() {
         />
       )}
 
-      {loading ? (
-        <p>Đang tải...</p>
-      ) : tasks.length === 0 ? (
-        <p>Chưa có task nào</p>
-      ) : (
-        <ul className="space-y-2">
-          {tasks.map((task) => (
-            <li key={task.id} className="border rounded p-3 shadow-sm bg-white">
-              <h2 className="font-semibold">{task.title}</h2>
-              {task.des && <p className="text-gray-600">{task.des}</p>}
-              {task.deadline && (
-                <p className="text-sm text-red-500">
-                  Deadline: {new Date(task.deadline).toLocaleDateString()}
-                </p>
-              )}
-              <span className="text-sm text-gray-500">
-                Trạng thái: {task.status}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div style={{ height: "80vh" }}>
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          defaultView={Views.WEEK}
+          views={[Views.WEEK, Views.DAY]}
+          step={60}
+          timeslots={1}
+          date={currentDate}
+          onNavigate={(newDate) => setCurrentDate(newDate)}
+          style={{ height: "100%" }}
+        />
+      </div>
     </div>
   );
 }

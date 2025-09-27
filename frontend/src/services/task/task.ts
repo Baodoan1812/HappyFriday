@@ -10,7 +10,7 @@ export const getTasks = async () => {
     throw error;
   }
 }
-export const createTask = async (task: { title: string; des: string; deadline: string; status?: string }) => {
+export const createTask = async (task: { title: string; des: string;start:string; deadline: string; status?: string }) => {
     try {
         const res = await api.post("/tasks/", task,
             { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }

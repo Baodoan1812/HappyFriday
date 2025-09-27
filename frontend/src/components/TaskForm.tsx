@@ -10,17 +10,20 @@ type TaskFormProps = {
 export default function TaskForm({ onSuccess, onCancel }: TaskFormProps) {
   const [title, setTitle] = useState("");
   const [des, setDes] = useState("");
+  const [start, setStart] = useState("");      // thêm state cho start
   const [deadline, setDeadline] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const newTask = { title, des, deadline, status: "todo" };
+      // start và deadline đều là ISO string từ datetime-local
+      const newTask = { title, des, start, deadline, status: "todo" };
       const res = await createTask(newTask);
       console.log("Created task:", res);
       if (res) {
         setTitle("");
         setDes("");
+        setStart("");
         setDeadline("");
         onSuccess(); // reload lại danh sách
       }
@@ -55,9 +58,20 @@ export default function TaskForm({ onSuccess, onCancel }: TaskFormProps) {
           </div>
 
           <div>
+            <label className="block text-sm font-medium">Start</label>
+            <input
+              type="datetime-local"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+              required
+              className="w-full border p-2 rounded"
+            />
+          </div>
+
+          <div>
             <label className="block text-sm font-medium">Deadline</label>
             <input
-              type="date"
+              type="datetime-local"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
               required
