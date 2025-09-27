@@ -15,12 +15,14 @@ class Task(models.Model):
         choices=STATUS_CHOICES,
         default="todo"
     )  # Trạng thái task
+    start = models.DateTimeField()
     deadline = models.DateTimeField(blank=True, null=True)  # Hạn hoàn thành
     created_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Liên kết đến User
         on_delete=models.CASCADE,
         related_name="created_tasks"
     )  # Người tạo task
-
+    created_at = models.DateTimeField(auto_now_add=True)  # hệ thống tự set
+    updated_at = models.DateTimeField(auto_now=True)      # update mỗi lần save
     def __str__(self):
         return self.title
